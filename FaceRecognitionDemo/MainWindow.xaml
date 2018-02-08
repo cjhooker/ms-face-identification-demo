@@ -5,8 +5,42 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FaceRecognitionDemo"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
+        Title="MainWindow" 
+        Height="640" Width="1200"
+        Background="#F8F9FA"
+        Loaded="OnWindowLoad">
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="30" />
+            <ColumnDefinition Width="500" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <ImageBrush x:Key="enso" ImageSource="MB_enso-radiance.png" Opacity="0.2"></ImageBrush>
+        </Grid.Resources>
         
+        <Label FontSize="32" FontWeight="Bold" Foreground="#b52b72" HorizontalAlignment="Center">
+            Client Core Guild MS Face API Demo
+        </Label>
+
+        <Button x:Name="StartButton" Grid.Column="2" Grid.Row="0"
+                FontSize="24" Background="#b52b72" BorderBrush="#23232a" BorderThickness="3" FontWeight="Bold"
+                Click="StartButton_Click">
+            Start Camera
+        </Button>
+
+        <Image x:Name="CameraImage" Grid.Column="0" Grid.Row="2" Margin="5" />
+
+        <ScrollViewer Grid.Column="2" Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Background="{StaticResource enso}">
+            <TextBlock x:Name="MessageArea" 
+                       FontSize="32" FontWeight="Bold" Foreground="#23232a" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center">
+                No faces detected
+            </TextBlock>
+        </ScrollViewer>
     </Grid>
 </Window>
