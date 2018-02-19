@@ -20,9 +20,6 @@
             <RowDefinition Height="30" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid.Resources>
-            <ImageBrush x:Key="enso" ImageSource="MB_enso-radiance.png" Opacity="0.2"></ImageBrush>
-        </Grid.Resources>
         
         <Label FontSize="32" FontWeight="Bold" Foreground="#b52b72" HorizontalAlignment="Center">
             Client Core Guild MS Face API Demo
@@ -36,8 +33,8 @@
 
         <Image x:Name="CameraImage" Grid.Column="0" Grid.Row="2" Margin="5" />
 
-        <ScrollViewer Grid.Column="2" Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Background="{StaticResource enso}">
-            <TextBlock x:Name="MessageArea" 
+        <ScrollViewer Grid.Column="2" Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
+                <TextBlock x:Name="MessageArea" 
                        FontSize="32" FontWeight="Bold" Foreground="#23232a" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center">
                 No faces detected
             </TextBlock>
