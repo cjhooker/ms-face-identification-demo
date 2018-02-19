@@ -3,10 +3,13 @@ using Microsoft.ProjectOxford.Face.Contract;
 using OpenCvSharp.Extensions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
+using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using VideoFrameAnalyzer;
 
 namespace FaceRecognitionDemo
@@ -21,11 +24,25 @@ namespace FaceRecognitionDemo
         private Person[] _persons = null;
         private const string GroupName = "test-group-2";
 
+        private readonly string _isolatedStorageSubscriptionKeyFileName = "Subscription.txt";
+        private readonly string _isolatedStorageSubscriptionEndpointFileName = "SubscriptionEndpoint.txt";
+
+        private readonly string _defaultSubscriptionKeyPromptMessage = "Paste your subscription key here";
+        private readonly string _defaultSubscriptionEndpointPromptMessage = "Paste your endpoint here";
+        
+        public string SubscriptionKey { get; set; }
+
+        public string SubscriptionEndpoint { get; set; }
+        
         public MainWindow()
         {
             InitializeComponent();
 
-            _faceClient = new FaceServiceClient("848829ca90474c78bd9e57c0e52ad694", "https://westus.api.cognitive.microsoft.com/face/v1.0");
+            SubscriptionKey = GetSubscriptionKeyFromIsolatedStorage();
+            SubscriptionEndpoint = GetSubscriptionEndpointFromIsolatedStorage();
+
+            SubscriptionKeyTextBox.Text = SubscriptionKey;
+            SubscriptionEndpointTextBox.Text = SubscriptionEndpoint;
 
             _grabber = new FrameGrabber<LiveCameraResult>
             {
@@ -34,10 +51,8 @@ namespace FaceRecognitionDemo
             _grabber.TriggerAnalysisOnInterval(new TimeSpan(0, 0, 2));
         }
 
-        private async void OnWindowLoad(object sender, RoutedEventArgs eventArgs)
+        private void OnWindowLoad(object sender, RoutedEventArgs eventArgs)
         {
-            _persons = await _faceClient.ListPersonsAsync(GroupName);
-
             // Set up a listener for when the client receives a new frame.
             _grabber.NewFrameProvided += (s, e) =>
             {
@@ -78,6 +93,9 @@ namespace FaceRecognitionDemo
 
         private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
+            _faceClient = new FaceServiceClient(SubscriptionKey, SubscriptionEndpoint);
+            _persons = await _faceClient.ListPersonsAsync(GroupName);
+
             await StartCamera();
         }
 
@@ -152,5 +170,118 @@ namespace FaceRecognitionDemo
             await _grabber.StartProcessingCameraAsync(0);
         }
 
+        /// <summary>
+        /// Gets the subscription key from isolated storage.
+        /// </summary>
+        /// <returns></returns>
+        private string GetSubscriptionKeyFromIsolatedStorage()
+        {
+            string subscriptionKey = null;
+
+            using (IsolatedStorageFile isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null))
+            {
+                try
+                {
+                    using (var iStream = new IsolatedStorageFileStream(_isolatedStorageSubscriptionKeyFileName, FileMode.Open, isoStore))
+                    {
+                        using (var reader = new StreamReader(iStream))
+                        {
+                            subscriptionKey = reader.ReadLine();
+                        }
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    subscriptionKey = null;
+                }
+            }
+            if (string.IsNullOrEmpty(subscriptionKey))
+            {
+                subscriptionKey = _defaultSubscriptionKeyPromptMessage;
+            }
+            return subscriptionKey;
+        }
+
+        /// <summary>
+        /// Gets the subscription endpoint from isolated storage.
+        /// </summary>
+        /// <returns></returns>
+        private string GetSubscriptionEndpointFromIsolatedStorage()
+        {
+            string subscriptionEndpoint = null;
+
+            using (IsolatedStorageFile isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null))
+            {
+                try
+                {
+                    using (var iStreamForEndpoint = new IsolatedStorageFileStream(_isolatedStorageSubscriptionEndpointFileName, FileMode.Open, isoStore))
+                    {
+                        using (var readerForEndpoint = new StreamReader(iStreamForEndpoint))
+                        {
+                            subscriptionEndpoint = readerForEndpoint.ReadLine();
+                        }
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    subscriptionEndpoint = null;
+                }
+            }
+            if (string.IsNullOrEmpty(subscriptionEndpoint))
+            {
+                subscriptionEndpoint = _defaultSubscriptionEndpointPromptMessage;
+            }
+            return subscriptionEndpoint;
+        }
+        
+        /// <summary>
+        /// Saves the subscription key to isolated storage.
+        /// </summary>
+        /// <param name="subscriptionKey">The subscription key.</param>
+        private void SaveSubscriptionKeyToIsolatedStorage(string subscriptionKey)
+        {
+            using (IsolatedStorageFile isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null))
+            {
+                using (var oStream = new IsolatedStorageFileStream(_isolatedStorageSubscriptionKeyFileName, FileMode.Create, isoStore))
+                {
+                    using (var writer = new StreamWriter(oStream))
+                    {
+                        writer.WriteLine(subscriptionKey);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Saves the subscription endpoint to isolated storage.
+        /// </summary>
+        /// <param name="subscriptionEndpoint">The subscription endpoint.</param>
+        private void SaveSubscriptionEndpointToIsolatedStorage(string subscriptionEndpoint)
+        {
+            using (IsolatedStorageFile isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null))
+            {
+                using (var oStream = new IsolatedStorageFileStream(_isolatedStorageSubscriptionEndpointFileName, FileMode.Create, isoStore))
+                {
+                    using (var writer = new StreamWriter(oStream))
+                    {
+                        writer.WriteLine(subscriptionEndpoint);
+                    }
+                }
+            }
+        }
+
+        private void SubscriptionKeyTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var subscriptionKey = ((TextBox)sender).Text;
+            SubscriptionKey = subscriptionKey;
+            SaveSubscriptionKeyToIsolatedStorage(subscriptionKey);
+        }
+
+        private void SubscriptionEndpointTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var subscriptionEndpoint = ((TextBox)sender).Text;
+            SubscriptionEndpoint = subscriptionEndpoint;
+            SaveSubscriptionEndpointToIsolatedStorage(subscriptionEndpoint);
+        }
     }
 }

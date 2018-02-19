@@ -17,23 +17,34 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="50" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="20" />
+            <RowDefinition Height="50" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <Label FontSize="32" FontWeight="Bold" Foreground="#b52b72" HorizontalAlignment="Center">
+
+        <Label Grid.Column="0" Grid.Row="0" FontSize="32" FontWeight="Bold" Foreground="#b52b72" HorizontalAlignment="Center">
             Client Core Guild MS Face API Demo
         </Label>
 
-        <Button x:Name="StartButton" Grid.Column="2" Grid.Row="0"
+        <StackPanel Grid.Column="3" Grid.Row="0">
+            <TextBox x:Name="SubscriptionKeyTextBox" Height="20" 
+                     Text="Key" 
+                     LostFocus="SubscriptionKeyTextBox_LostFocus"></TextBox>
+            <TextBox x:Name="SubscriptionEndpointTextBox" Height="20" Margin="0,10,0,0" 
+                     Text="Endpoint" 
+                     LostFocus="SubscriptionEndpointTextBox_LostFocus"></TextBox>
+        </StackPanel>
+
+        <Image x:Name="CameraImage" Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Margin="5" Source="start.png" />
+
+        <Button x:Name="StartButton" Grid.Column="2" Grid.Row="2"
                 FontSize="24" Background="#b52b72" BorderBrush="#23232a" BorderThickness="3" FontWeight="Bold"
                 Click="StartButton_Click">
             Start Camera
         </Button>
 
-        <Image x:Name="CameraImage" Grid.Column="0" Grid.Row="2" Margin="5" />
 
-        <ScrollViewer Grid.Column="2" Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
+        <ScrollViewer Grid.Column="2" Grid.Row="3" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
                 <TextBlock x:Name="MessageArea" 
                        FontSize="32" FontWeight="Bold" Foreground="#23232a" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center">
                 No faces detected
