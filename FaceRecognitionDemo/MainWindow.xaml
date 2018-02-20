@@ -16,7 +16,7 @@
             <ColumnDefinition Width="500" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50" />
+            <RowDefinition Height="85" />
             <RowDefinition Height="20" />
             <RowDefinition Height="50" />
             <RowDefinition Height="*" />
@@ -33,6 +33,16 @@
             <TextBox x:Name="SubscriptionEndpointTextBox" Height="20" Margin="0,10,0,0" 
                      Text="Endpoint" 
                      LostFocus="SubscriptionEndpointTextBox_LostFocus"></TextBox>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <TextBox x:Name="PersonGroupNameTextBox" Height="20" Width="150" Margin="0,0,10,0"
+                     Text="demo-group"></TextBox>
+                <Button x:Name="LoadButton" Height="20" Padding="10,0"
+                    FontSize="12" Background="#b52b72" BorderBrush="#23232a" BorderThickness="1" FontWeight="Bold"
+                    Click="LoadButton_Click">
+                    Load Person Group
+                </Button>
+                <Label x:Name="LoaderStatusLabel"></Label>
+            </StackPanel>
         </StackPanel>
 
         <Image x:Name="CameraImage" Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Margin="5" Source="start.png" />

@@ -22,13 +22,13 @@ namespace FaceRecognitionDemo
         private FaceServiceClient _faceClient = null;
         private readonly FrameGrabber<LiveCameraResult> _grabber = null;
         private Person[] _persons = null;
-        private const string GroupName = "test-group-2";
+        private string _groupName { get; set; }
 
         private readonly string _isolatedStorageSubscriptionKeyFileName = "Subscription.txt";
         private readonly string _isolatedStorageSubscriptionEndpointFileName = "SubscriptionEndpoint.txt";
 
         private readonly string _defaultSubscriptionKeyPromptMessage = "Paste your subscription key here";
-        private readonly string _defaultSubscriptionEndpointPromptMessage = "Paste your endpoint here";
+        private readonly string _defaultSubscriptionEndpointPromptMessage = "Paste your endpoint URL here";
         
         public string SubscriptionKey { get; set; }
 
@@ -91,13 +91,41 @@ namespace FaceRecognitionDemo
             };
         }
 
+        #region Event Handlers
+
         private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
             _faceClient = new FaceServiceClient(SubscriptionKey, SubscriptionEndpoint);
-            _persons = await _faceClient.ListPersonsAsync(GroupName);
+            _groupName = PersonGroupNameTextBox.Text;
+            _persons = await _faceClient.ListPersonsAsync(_groupName);
 
             await StartCamera();
         }
+
+        private void LoadButton_Click(object sender, RoutedEventArgs e)
+        {
+            _faceClient = new FaceServiceClient(SubscriptionKey, SubscriptionEndpoint);
+            _groupName = PersonGroupNameTextBox.Text;
+
+            var loader = new PersonGroupLoader(_faceClient, _groupName, this);
+            loader.Load();
+        }
+
+        private void SubscriptionKeyTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var subscriptionKey = ((TextBox)sender).Text;
+            SubscriptionKey = subscriptionKey;
+            SaveSubscriptionKeyToIsolatedStorage(subscriptionKey);
+        }
+
+        private void SubscriptionEndpointTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var subscriptionEndpoint = ((TextBox)sender).Text;
+            SubscriptionEndpoint = subscriptionEndpoint;
+            SaveSubscriptionEndpointToIsolatedStorage(subscriptionEndpoint);
+        }
+
+        #endregion
 
         /// <summary> Function which submits a frame to the Face API. </summary>
         /// <param name="frame"> The video frame to submit. </param>
@@ -120,7 +148,7 @@ namespace FaceRecognitionDemo
 
                 // Identify each face
                 // Call identify REST API, the result contains identified person information
-                var identifyResult = await _faceClient.IdentifyAsync(GroupName, faces.Select(ff => ff.FaceId).ToArray());
+                var identifyResult = await _faceClient.IdentifyAsync(_groupName, faces.Select(ff => ff.FaceId).ToArray());
                 for (int idx = 0; idx < faces.Length; idx++)
                 {
                     // Update identification result for rendering
@@ -268,20 +296,6 @@ namespace FaceRecognitionDemo
                     }
                 }
             }
-        }
-
-        private void SubscriptionKeyTextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            var subscriptionKey = ((TextBox)sender).Text;
-            SubscriptionKey = subscriptionKey;
-            SaveSubscriptionKeyToIsolatedStorage(subscriptionKey);
-        }
-
-        private void SubscriptionEndpointTextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            var subscriptionEndpoint = ((TextBox)sender).Text;
-            SubscriptionEndpoint = subscriptionEndpoint;
-            SaveSubscriptionEndpointToIsolatedStorage(subscriptionEndpoint);
         }
     }
 }
